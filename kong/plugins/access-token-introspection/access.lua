@@ -15,14 +15,13 @@ end
 
 
 function _M.introspect_access_token_req(access_token)
-    local httpc = http:new()
+    local httpc = http.new()
+
     local res, err = httpc:request_uri(_M.conf.introspection_endpoint, {
         method = "POST",
-        ssl_verify = false,
         body = "token_type_hint=access_token&token=" .. access_token .. "&client_id=" .. _M.conf.client_id .. "&client_secret=" .. _M.conf.client_secret,
-        headers = { ["Content-Type"] = "application/x-www-form-urlencoded", }
+        headers = { ["Content-Type"] = "application/x-www-form-urlencoded" }
     })
-
     if not res then
         return { status = 0 }
     end
@@ -94,8 +93,9 @@ function _M.run(conf)
         _M.error_response("Forbidden", ngx.HTTP_FORBIDDEN)
     end
 
-    ngx.req.set_header("X-Credential-Sub", data["sub"])
+    ngx.req.set_header("X-Credential-Authorities", data["authorities"])
     ngx.req.set_header("X-Credential-Scope", data["scope"])
+    ngx.req.set_header("X-Credential-Serial", data["serial"])
     -- clear token header from req
     ngx.req.clear_header(_M.conf.token_header)
 end
